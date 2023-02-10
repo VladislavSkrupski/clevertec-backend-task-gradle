@@ -6,3 +6,5 @@
 build
 /.idea/
 out/
+/outputFatJar/multi-project-api-1.0.jar
+/outputFatJar/
