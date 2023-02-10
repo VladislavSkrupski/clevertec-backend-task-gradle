@@ -26,11 +26,11 @@ jar {
         attributes("name": "${archivesBaseName}",
                 "version": "${version}")
     }
-//    from sourceSets.main.output
-//    dependsOn configurations.runtimeClasspath
-//    from {
-//        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
-//    }
+    from sourceSets.main.output
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
 }
 
 tasks.register('copyLib') {
@@ -44,10 +44,6 @@ tasks.register('copyLib') {
 }
 
 build.dependsOn copyLib
-
-clean {
-    file("${archivesBaseName}-${version}.jar").delete()
-}
 
 test {
     useJUnitPlatform()
