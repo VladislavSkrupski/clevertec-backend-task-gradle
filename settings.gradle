@@ -1,2 +1,8 @@
-rootProject.name = 'multi-project'
+rootProject.name = 'clevertec-backend-task-gradle'
 include('lib')
+include 'multi-project'
+include 'multi-project:core'
+findProject(':multi-project:core')?.name = 'core'
+include 'multi-project:api'
+findProject(':multi-project:api')?.name = 'api'
+

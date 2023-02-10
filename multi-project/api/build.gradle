@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+}
+
+group 'ru.clevertec'
+
+repositories {
+    mavenCentral()
+}
+archivesBaseName = 'multi-project-api'
+version = '1.0'
+jar {
+    manifest {
+        attributes("Main-Class": "ru.clevertec.App",
+                "name": archivesBaseName,
+                "version": version)
+    }
+    from sourceSets.main.output
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+}
+
+dependencies {
+    implementation project(':multi-project:core')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+compileJava.dependsOn(':multi-project:core:build')
+
+tasks.register('copyApiFatJar') {
+    dependsOn(build)
+    doLast {
+        copy {
+            from 'build/libs/'
+            into '../../outputFatJar'
+        }
+    }
+}
+
+clean{
+    file("../../outputFatJar/${archivesBaseName}-${version}.jar").delete()
+    file("../../outputFatJar").delete()
+}
