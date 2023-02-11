@@ -1,0 +1,64 @@
+plugins {
+    id 'java'
+    id 'com.gradle.plugin-publish' version '1.0.0'
+}
+group = 'ru.clevertec'
+version = '1.0'
+//
+gradlePlugin {
+    website = 'https://github.com/VladislavSkrupski/clevertec-backend-task-gradle'
+    vcsUrl = 'https://github.com/VladislavSkrupski/clevertec-backend-task-gradle.git'
+    plugins {
+        JUnitTestsWithReportsPlugin {
+            id = 'ru.clevertec.JUnitTestsWithReportsPlugin'
+            displayName = 'JUnit tests with replaced reports'
+            description = 'JUnit tests with replaced reports (part of study project)'
+            tags.set(['tests', 'reports', 'study', 'plugins'])
+            implementationClass = 'ru.clevertec.JUnitTestsWithReportsPlugin'
+        }
+    }
+}
+
+//publishing {
+//    repositories {
+//        maven {
+//            name = 'local'
+//            url = '../local'
+//        }
+//    }
+//}
+
+class JUnitTestsWithReportsPlugin implements Plugin<Project> {
+    void apply(Project project) {
+        project.tasks.getByName('test') {
+            useJUnitPlatform()
+        }
+
+        project.tasks.register('moveToRootReportsDir') {
+            doFirst {
+                project.copy {
+                    //duplicatesStrategy(DuplicatesStrategy.INCLUDE)
+                    from "$project.buildDir/reports"
+                    into "$project.rootDir/reports/$project.name"
+                }
+            }
+            doLast {
+                project.delete {
+                    "$project.buildDir/reports"
+                }
+            }
+        }
+        project.tasks.getByName('clean') {
+//            onlyIf {
+//                project.file("$project.rootDir/reports").exists()
+//            }
+//            doLast {
+//                project.delete {
+//                    "$project.rootDir/reports"
+//                }
+//            }
+        }
+    }
+}
+
+apply plugin: JUnitTestsWithReportsPlugin
