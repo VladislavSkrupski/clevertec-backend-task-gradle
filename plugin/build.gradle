@@ -1,64 +1,53 @@
 plugins {
-    id 'java'
-    id 'com.gradle.plugin-publish' version '1.0.0'
+    id 'java-gradle-plugin'
+    id 'groovy'
+    id 'maven-publish'
+    id "com.gradle.plugin-publish" version "1.1.0"
 }
-group = 'ru.clevertec'
-version = '1.0'
-//
+
+repositories {
+    mavenCentral()
+}
+
+group = 'by.vladsk'
+archivesBaseName = 'testreportsrebase'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+jar {
+    manifest { attributes("name": "$archivesBaseName", "version": "$version") }
+}
+
 gradlePlugin {
     website = 'https://github.com/VladislavSkrupski/clevertec-backend-task-gradle'
-    vcsUrl = 'https://github.com/VladislavSkrupski/clevertec-backend-task-gradle.git'
+    vcsUrl = 'https://github.com/VladislavSkrupski/clevertec-backend-task-gradle'
     plugins {
-        JUnitTestsWithReportsPlugin {
-            id = 'ru.clevertec.JUnitTestsWithReportsPlugin'
-            displayName = 'JUnit tests with replaced reports'
-            description = 'JUnit tests with replaced reports (part of study project)'
-            tags.set(['tests', 'reports', 'study', 'plugins'])
-            implementationClass = 'ru.clevertec.JUnitTestsWithReportsPlugin'
+        testReportsRebasePlugin {
+            id = "${group}.test-reports-rebase"
+            displayName = 'Test reports rebase'
+            description = 'plugin rebase test reports to project root directory (study plugin)'
+            tags.addAll('testreports', 'rebase', 'study')
+            implementationClass = 'ru.clevertec.TestReportsRebasePlugin'
         }
     }
 }
 
-//publishing {
-//    repositories {
-//        maven {
-//            name = 'local'
-//            url = '../local'
-//        }
-//    }
-//}
-
-class JUnitTestsWithReportsPlugin implements Plugin<Project> {
-    void apply(Project project) {
-        project.tasks.getByName('test') {
-            useJUnitPlatform()
+publishing {
+    repositories {
+        maven {
+            url = layout.projectDirectory.dir('repository')
         }
-
-        project.tasks.register('moveToRootReportsDir') {
-            doFirst {
-                project.copy {
-                    //duplicatesStrategy(DuplicatesStrategy.INCLUDE)
-                    from "$project.buildDir/reports"
-                    into "$project.rootDir/reports/$project.name"
-                }
-            }
-            doLast {
-                project.delete {
-                    "$project.buildDir/reports"
-                }
-            }
-        }
-        project.tasks.getByName('clean') {
-//            onlyIf {
-//                project.file("$project.rootDir/reports").exists()
-//            }
-//            doLast {
-//                project.delete {
-//                    "$project.rootDir/reports"
-//                }
-//            }
+    }
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
         }
     }
 }
 
-apply plugin: JUnitTestsWithReportsPlugin
+publish.dependsOn(build)
