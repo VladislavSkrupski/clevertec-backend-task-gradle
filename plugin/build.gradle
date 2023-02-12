@@ -1,0 +1,53 @@
+plugins {
+    id 'java-gradle-plugin'
+    id 'groovy'
+    id 'maven-publish'
+    id "com.gradle.plugin-publish" version "1.1.0"
+}
+
+repositories {
+    mavenCentral()
+}
+
+group = 'by.vladsk'
+archivesBaseName = 'testreportsrebase'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+jar {
+    manifest { attributes("name": "$archivesBaseName", "version": "$version") }
+}
+
+gradlePlugin {
+    website = 'https://github.com/VladislavSkrupski/clevertec-backend-task-gradle'
+    vcsUrl = 'https://github.com/VladislavSkrupski/clevertec-backend-task-gradle'
+    plugins {
+        testReportsRebasePlugin {
+            id = "${group}.test-reports-rebase"
+            displayName = 'Test reports rebase'
+            description = 'plugin rebase test reports to project root directory (study plugin)'
+            tags.addAll('testreports', 'rebase', 'study')
+            implementationClass = 'ru.clevertec.TestReportsRebasePlugin'
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            url = layout.projectDirectory.dir('repository')
+        }
+    }
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+publish.dependsOn(build)
